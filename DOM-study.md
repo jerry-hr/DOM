@@ -1,3 +1,5 @@
+
+
 #### **DOM的基本概念**
 
 （DOM是JS操控HTML和CSS的桥梁  ）
@@ -125,4 +127,201 @@ DOM(Document Object Model,文档对象模型)是JavaScript操作HTML文档的接
          console.log(lis_inlist1);
          ```
 
-         
+
+#### 节点的关系
+
+1. ![image-20210223104559148](../../AppData/Roaming/Typora/typora-user-images/image-20210223104559148.png)
+
+   ![image-20210223104640836](../../AppData/Roaming/Typora/typora-user-images/image-20210223104640836.png)
+
+**注意：**
+
+- DOM中，文本节点也属于节点，在使用节点的关系时一定要注意
+- 在标准的W3C规范中，空白文本节点也应该算做节点，但是在IE8及以前的浏览器中会有一定的兼容问题，他们不把空文本节点当做节点
+
+![image-20210223105207857](../../AppData/Roaming/Typora/typora-user-images/image-20210223105207857.png)
+
+```
+HTML代码:
+<div id="box">
+	<p>我是段落</p>
+	<p id="para">我是段落</p>
+	<p>我是段落</p>
+</div>
+JS代码:
+var box = document.getElementById('box');
+para = document.getElementById('para');
+//所有子节点
+console.log(box.childNodes);
+//所有元素子节点(IE9开始兼容)
+console.log(box.chileren);
+
+//第一个子节点
+console.log(box.firstChild);
+console.log(box.firstChild.nodeType);
+//第一个元素子节点(IE9开始兼容)
+console.log(box.firstElementChild);
+
+//最后一个子节点
+console.log(box.lastChild);
+console.log(box.lastChild.nodeType);
+//最后一个元素子节点(IE9开始兼容)
+console.log(box.lastElementChild);
+
+//父节点
+console.log(para.parentNode);
+
+//前一个兄弟节点
+console.log(para.previousSibling);
+//前一个元素兄弟节点(IE9开始兼容)
+console.log(para.previousElementSibling);
+
+//后一个兄弟节点
+console.log(para.nextSibling);
+//后一个元素兄弟节点(IE9开始兼容)
+console.log(para.nextElementSibling);
+
+```
+
+#### 封装节点关系函数
+
+1. 书写常见的节点关系函数
+
+   1. 书写IE6也能兼容的“寻找所有元素子节点”函数
+
+      ```
+      HTML代码:
+      <div id="box">
+      	<p>我是段落</p>
+      	<p id="para">我是段落</p>
+      	<p>我是段落</p>
+      </div>
+      JS代码:
+      var box = document.getElementById('box');
+      var para = document.getElementById('para');
+      //封装一个函数，这个函数可以返回元素的所有子元素节点(兼容到IE6)，类似children的功能
+      function getChildren(node) {
+      	//结果数组
+      	var children = [];
+      	//遍历node这个节点的所有子节点，判断每一个子节点的nodeType属性是不是1
+      	//如果是1，就推入结果数组(1代表元素节点)
+      	for(var i = 0; i < node.childNodes.length; i++) {
+      		if(node.childNodes[i].nodeType == 1) {
+      			children.push(node.childNodes[i]);
+      		}
+      	}
+      	return children;
+      }
+      console.log(getChildren(box));
+      console.log(getChildren(para));
+      ```
+
+      2.书写IE6也能兼容的“寻找前一个元素兄弟节点”函数
+
+      ```
+      HTML代码:
+      <div id="box">
+      	<p id="fpara">我是段落</p>
+      	<p id="para">我是段落</p>
+      	<p>我是段落</p>
+      </div>
+      JS代码:
+      var box = document.getElementById('box');
+      var para = document.getElementById('para');
+      var fpara = document.getElementById('fpara');
+      //封装一个函数，这个函数可以返回元素的前一个元素兄弟节点(兼容到IE6),类似previousElementSibling的功能
+      function 
+      
+      getElementPrevSibling(node) {
+      	var o = node;
+      	//使用while语句
+      	while(o.previousSibling != null) {
+      		if(o.previousSibling.nodeType == 1) {
+      			//结束循环，找到了
+      			return o.previousSibling;
+      		}
+      		//让o成为它的前一个节点
+      		o = o.previousSibling;
+      	}
+      	return null;
+      }
+      console.log(getElementPrevSibling(para));
+      ```
+
+      3.如何编写函数，获得某元素的所有元素兄弟节点
+
+      ```
+      HTML代码:
+      <div id="box">
+      	<p>我是段落</p>
+      	<p>我是段落</p>
+      	<p>我是段落</p>
+      	<p id="fpara">我是段落</p>
+      	<p id="para">我是段落</p>
+      	<p>我是段落</p>
+      </div>
+      JS代码:
+      var box = document.getElementById('box');
+      var para = document.getElementById('para');
+      //封装一个函数，这个函数可以返回元素的所有元素兄弟节点
+      function getAllElementSibling(node) {
+      	//前面的元素兄弟节点
+      	var prevs = [];
+      	//后面的元素兄弟节点
+      	var nexts = [];
+      	var o = node;
+      	//遍历node的前面的节点
+      	while(o.previousSibling != null) {
+      	if(o.previousSibling.nodeType == 1) {
+      		//从头部插入	
+      		prevs.unshift(o.previousSibling);
+      	}
+      	//类似把前一个当做现在继续遍历
+      	o = o.previousSibling;
+      	}
+      	o = node;
+      	//遍历node的后面的节点
+      	while(o.nextSibling != null) {
+      	if(o.nextSibling.nodeType == 1) {
+      nexts.push(o.nextSibling);
+      	}
+      	o = o.nextSibling;
+      	
+      }
+      //将两个数组进行合并，然后返回
+      return prevs.concat(nexts);
+      }
+      console.log(getAllElementSibling(para));
+      ```
+
+2. 如何改变元素节点中的内容
+
+   1. 改变元素节点中的内容可以使用两个相关属性
+
+      1. innerHTML属性能以HTML语法设置节点中的内容
+
+         ```
+         HTML代码:
+         <div id="box"></div>
+         JS代码:
+         var oBox = document.getElementById('box');
+         oBox.innerHTML = '慕课网';
+         oBox.innerHTML = '<ul><li>牛奶</li><li>咖啡</li></ul>';
+         ```
+
+         ![image-20210224120006266](../../AppData/Roaming/Typora/typora-user-images/image-20210224120006266.png)![image-20210224120034169](../../AppData/Roaming/Typora/typora-user-images/image-20210224120034169.png)
+
+      2. innerText属性只能以纯文本的形式设置节点中的内容
+
+         ```
+         HTML代码:
+         <div id="box"></div>
+         JS代码:
+         var oBox = document.getElementById('box');
+         oBox.innerText = '<ul><li>牛奶</li><li>咖啡</li></ul>';//会直接输出
+         oBox.innerText = '慕课网';
+         ```
+
+         ![image-20210224120122354](../../AppData/Roaming/Typora/typora-user-images/image-20210224120122354.png)![image-20210224120144520](../../AppData/Roaming/Typora/typora-user-images/image-20210224120144520.png)
+
+   
